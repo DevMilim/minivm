@@ -1,11 +1,9 @@
-use std::collections::HashMap;
-
 use crate::{OpCode, Value};
 
 #[derive(Debug)]
 pub struct VM {
-    pub code: Vec<OpCode>,
-    ip: usize,
+    pub code: Vec<u8>,
+    pc: usize,
     stack: Vec<Value>,
     vars: Vec<Value>,
 }
@@ -14,23 +12,49 @@ impl VM {
     pub fn new() -> Self {
         Self {
             code: Vec::new(),
-            ip: 0,
+            pc: 0,
             stack: Vec::new(),
             vars: Vec::new(),
         }
     }
     pub fn advance(&mut self) {
-        self.ip += 1;
+        self.pc += 1;
     }
-    pub fn fetch(&mut self) -> OpCode {
-        let op = self.code[self.ip];
+    pub fn fetch(&mut self) -> u8 {
+        let op = self.code[self.pc];
 
-        self.ip += 1;
+        self.pc += 1;
         op
     }
 
     fn pop(&mut self) -> Value {
         self.stack.pop().expect("Stack Underflow")
+    }
+
+    fn next_u8(&mut self) -> u8 {
+        let res = self.code[self.pc];
+
+        self.pc += 1;
+        res
+    }
+
+    fn next_u16(&mut self) -> u16 {
+        let res = u16::from_le_bytes([self.code[self.pc], self.code[self.pc + 1]]);
+
+        self.pc += 2;
+        res
+    }
+
+    fn next_u32(&mut self) -> u32 {
+        let res = u32::from_le_bytes([
+            self.code[self.pc],
+            self.code[self.pc + 1],
+            self.code[self.pc + 2],
+            self.code[self.pc + 3],
+        ]);
+
+        self.pc += 4;
+        res
     }
 
     pub fn run(&mut self) {
@@ -39,7 +63,7 @@ impl VM {
 
             let op = self.fetch();
 
-            match op {
+            match OpCode::try_from(op).unwrap() {
                 OpCode::Add => {
                     let b = self.pop();
                     let a = self.pop();
@@ -86,17 +110,21 @@ impl VM {
                         _ => eprintln!("Operação invalida"),
                     }
                 }
-                OpCode::LoadConst(v) => {
-                    self.stack.push(v);
+                OpCode::LoadConst => {
+                    let idx = self.next_u8();
+                    let value = Value::Int(0);
+                    self.stack.push(value);
                 }
-                OpCode::StoreLocal(idx) => {
+                OpCode::StoreLocal => {
                     let value = self.pop();
+                    let idx = self.next_u8();
                     if self.vars.len() <= idx as usize {
                         self.vars.resize(idx as usize + 1, Value::Int(0));
                     }
                     self.vars[idx as usize] = value;
                 }
-                OpCode::LoadLocal(idx) => {
+                OpCode::LoadLocal => {
+                    let idx = self.next_u8();
                     let value = self.vars[idx as usize];
                     self.stack.push(value);
                 }

@@ -1,7 +1,18 @@
+use crate::Value;
+
 #[repr(u8)]
 #[derive(Clone, Copy, Debug)]
 pub enum OpCode {
-    LoadIntConst(i32),
+    LoadConst(Value),
+    StoreLocal(u8),
+    LoadLocal(u8),
     Add,
+    Sub,
+    Mul,
+    Div,
+    Greater,
+    Print,
+    Pop,
+    Dup,
     Halt,
 }

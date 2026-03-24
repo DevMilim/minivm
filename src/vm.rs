@@ -39,22 +39,23 @@ impl VM {
     }
 
     fn next_u16(&mut self) -> u16 {
-        let res = u16::from_le_bytes([self.code[self.pc], self.code[self.pc + 1]]);
+        let res = u16::from_le_bytes(self.get_bytes::<2>());
 
-        self.pc += 2;
         res
     }
 
-    fn next_u32(&mut self) -> u32 {
-        let res = u32::from_le_bytes([
-            self.code[self.pc],
-            self.code[self.pc + 1],
-            self.code[self.pc + 2],
-            self.code[self.pc + 3],
-        ]);
+    fn next_u32(&mut self, bytes: u8) -> u32 {
+        let res = u32::from_le_bytes(self.get_bytes::<4>());
 
-        self.pc += 4;
         res
+    }
+
+    fn get_bytes<const N: usize>(&mut self) -> [u8; N] {
+        let mut bytes: [u8; N] = [0u8; N];
+        for byte in 0..N {
+            bytes[byte] = self.next_u8();
+        }
+        bytes
     }
 
     pub fn run(&mut self) {

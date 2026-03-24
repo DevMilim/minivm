@@ -1,4 +1,4 @@
-use minivm::{OpCode, VM, Value};
+use minivm::VM;
 
 fn main() {
     let mut vm = VM::new();

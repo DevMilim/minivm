@@ -11,8 +11,6 @@ LLVM
 Back-end proprio
 codigo minimo inicial:
 ``` rust
-use crate::Values::X;
-
 const VALUES: &str = "HELLO";
 
 pub enum Values {
@@ -46,7 +44,7 @@ fn main() {
     for i in list {
         total += i;
     }
-    if let X(i) = X(12) {
+    if let Values::X(i) = X(12) {
         i;
     }
 }

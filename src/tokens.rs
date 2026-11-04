@@ -59,6 +59,7 @@ pub enum TokenKind {
     LShift,       //"<<"
     RShift,       //">>"
     DoubleColon,  // "::"
+    DotDot,       //'..'
 
     Ampersand, //'&'
 

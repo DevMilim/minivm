@@ -81,8 +81,14 @@ impl Lexer {
                 }
 
                 '.' => {
-                    self.advance();
-                    Ok(TokenKind::Dot)
+                    if self.peek() == Some(&'.') {
+                        self.advance();
+                        self.advance();
+                        Ok(TokenKind::DotDot)
+                    } else {
+                        self.advance();
+                        Ok(TokenKind::Dot)
+                    }
                 }
                 ',' => {
                     self.advance();
@@ -179,6 +185,16 @@ impl Lexer {
                         self.advance();
                         self.advance();
                         Ok(TokenKind::LessEqual)
+                    } else if self.peek() == Some(&'<') {
+                        self.advance();
+                        if self.peek() == Some(&'=') {
+                            self.advance();
+                            self.advance();
+                            Ok(TokenKind::LShiftAssign)
+                        } else {
+                            self.advance();
+                            Ok(TokenKind::LShift)
+                        }
                     } else {
                         self.advance();
                         Ok(TokenKind::Less)
@@ -189,12 +205,31 @@ impl Lexer {
                         self.advance();
                         self.advance();
                         Ok(TokenKind::GreaterEqual)
+                    } else if self.peek() == Some(&'>') {
+                        self.advance();
+                        if self.peek() == Some(&'=') {
+                            self.advance();
+                            self.advance();
+                            Ok(TokenKind::RShiftAssign)
+                        } else {
+                            self.advance();
+                            Ok(TokenKind::RShift)
+                        }
                     } else {
                         self.advance();
                         Ok(TokenKind::Greater)
                     }
                 }
-
+                '!' => {
+                    if self.peek() == Some(&'=') {
+                        self.advance();
+                        self.advance();
+                        Ok(TokenKind::NotEqual)
+                    } else {
+                        self.advance();
+                        Ok(TokenKind::Not)
+                    }
+                }
                 _ => Err(LexerError::InvalidChar(char)),
             }?;
             let end = self.cursor;
